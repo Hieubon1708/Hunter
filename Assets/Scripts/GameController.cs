@@ -1,18 +1,99 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameController : MonoBehaviour
+namespace Hunter
 {
-    // Start is called before the first frame update
-    void Start()
+    public class GameController : MonoBehaviour
     {
-        
-    }
+        public static GameController instance;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public List<NormalBot> poolNormalBots;
+        public List<SniperBot> poolSniperBots;
+        public List<BossBot> poolBoosBots;
+
+        public int indexNormalBot;
+        public int indexSniperBot;
+        public int indexBoosBot;
+
+        public GameObject preNormalBot;
+        public GameObject preSniperBot;
+        public GameObject preBossBot;
+
+        public Transform container;
+
+        public void Awake()
+        {
+            instance = this;
+        }
+
+        public void Start()
+        {
+            LoadLevel(1);
+        }
+
+        public enum BotType
+        {
+            Normal, Sniper, Boss
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                // do something
+            }
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                // do something
+            }
+        }
+
+        public void LoadLevel(int level)
+        {
+            ResetGame();
+            GameObject map = Instantiate(Resources.Load<GameObject>(level.ToString()));
+        }
+
+        public void Replay()
+        {
+
+        }
+
+        void ResetBots()
+        {
+            for (int i = 0; i < poolNormalBots.Count; i++)
+            {
+                poolNormalBots[i].ResetBot();
+            }
+            for (int i = 0; i < poolSniperBots.Count; i++)
+            {
+                poolSniperBots[i].ResetBot();
+            }
+            for (int i = 0; i < poolBoosBots.Count; i++)
+            {
+                poolBoosBots[i].ResetBot();
+            }
+        }
+
+
+        public void SetBot(BotType botType, PathInfo pathInfo)
+        {
+            if (botType == BotType.Normal)
+            {
+                if (indexNormalBot == poolNormalBots.Count)
+                {
+                    poolNormalBots.Add(Instantiate(preNormalBot, container).GetComponent<NormalBot>());
+                }
+                poolNormalBots[indexNormalBot].Init(pathInfo);
+                indexNormalBot++;
+            }
+        }
+
+        public void ResetGame()
+        {
+            indexNormalBot = 0;
+            indexSniperBot = 0;
+            indexBoosBot = 0;
+        }
     }
 }
