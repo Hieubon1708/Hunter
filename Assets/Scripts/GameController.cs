@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +35,11 @@ namespace Hunter
         public enum BotType
         {
             Normal, Sniper, Boss
+        }
+        
+        public enum PathType
+        {
+            Repeat, Circle
         }
 
         void Update()

@@ -47,9 +47,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   botType: 0
+  pathType: 0
   speed: 1
   path:
   - {fileID: 778823398143537807}
+  isUpdatePosition: 1
 --- !u!1 &5850957988646725783
 GameObject:
   m_ObjectHideFlags: 0

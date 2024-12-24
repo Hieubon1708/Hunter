@@ -6,7 +6,7 @@ namespace Hunter
     {
         public static int GetRadarAllLayerMask()
         {
-            return ~LayerMask.GetMask("Player");
+            return ~LayerMask.GetMask("Player", "Player");
         }
 
         public static int GetVictimLayerMask()

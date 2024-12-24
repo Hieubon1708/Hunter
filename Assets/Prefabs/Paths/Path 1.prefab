@@ -129,6 +129,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   botType: 0
+  pathType: 0
   speed: 1
   path:
   - {fileID: 2040158115855041852}
+  isUpdatePosition: 1
