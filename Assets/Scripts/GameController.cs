@@ -22,6 +22,8 @@ namespace Hunter
 
         public Transform container;
 
+        public Camera cam;
+
         public void Awake()
         {
             instance = this;

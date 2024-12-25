@@ -11,7 +11,7 @@ namespace EpicToonFX
         [Header("Adjust if not using Sphere Collider")]
         public float colliderRadius = 1f;
         [Range(0f, 1f)] // This is an offset that moves the impact effect slightly away from the point of impact to reduce clipping of the impact effect
-        public float collideOffset = 0.15f;
+        public float collideOffset = 0.1f;
 
         void Start()
         {

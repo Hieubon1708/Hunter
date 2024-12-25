@@ -192,7 +192,7 @@ Transform:
   m_GameObject: {fileID: 8603755923872235051}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -215,10 +215,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   botType: 0
   pathType: 0
+  time: 1
   speed: 1
+  rotateSpeed: 1
+  detectSpeed: 2
+  rotateDetectSpeed: 2
   path:
   - {fileID: 7790198334825939453}
   isUpdatePosition: 1
+  angle: 0
 --- !u!1 &8833775979844944130
 GameObject:
   m_ObjectHideFlags: 0

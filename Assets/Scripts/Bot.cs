@@ -1,6 +1,5 @@
 ﻿using DG.Tweening;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -26,6 +25,8 @@ namespace Hunter
 
         public RadarView radarView;
         public Animator animator;
+
+        public QuestionRotate questionRotate;
 
         public void Init(PathInfo pathInfo)
         {
@@ -55,50 +56,115 @@ namespace Hunter
             if (pathInfo.paths[0].Length > 1)
             {
                 ChangeSpeed(pathInfo.speed, pathInfo.rotateSpeed);
-                navMeshAgent.updatePosition = pathInfo.isUpdatePosition;
                 int index = 1;
-                if (pathInfo.pathType == GameController.PathType.Circle)
+                if (pathInfo.isUpdatePosition)
                 {
-                    while (true)
+                    if (pathInfo.pathType == GameController.PathType.Circle)
                     {
-                        if (pathInfo.isUpdatePosition) animator.SetBool("Walking", true);
-                        navMeshAgent.destination = pathInfo.paths[indexPath][index];
-                        yield return new WaitForFixedUpdate();
-                        yield return new WaitForFixedUpdate();
-                        yield return new WaitForFixedUpdate();
                         while (true)
                         {
-                            if (navMeshAgent.remainingDistance <= 0.15f && pathInfo.isUpdatePosition) animator.SetBool("Walking", false);
-                            if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                            Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
+                            Quaternion targetRotation = Quaternion.LookRotation(direction);
+                            while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                            {
+                                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pathInfo.rotateSpeed);
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            animator.SetBool("Walking", true);
+                            navMeshAgent.destination = pathInfo.paths[indexPath][index];
                             yield return new WaitForFixedUpdate();
+                            yield return new WaitForFixedUpdate();
+                            yield return new WaitForFixedUpdate();
+                            while (true)
+                            {
+                                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            if (index == pathInfo.paths[indexPath].Length - 1) index = 0;
+                            else index++;
                         }
-                        yield return new WaitForSeconds(pathInfo.time);
-                        if (index == pathInfo.paths[indexPath].Length - 1) index = 0;
-                        else index++;
                     }
-                }
-                else if (pathInfo.pathType == GameController.PathType.Repeat)
-                {
-                    bool isIncrease = true;
-                    while (true)
+                    else if (pathInfo.pathType == GameController.PathType.Repeat)
                     {
-                        if (pathInfo.isUpdatePosition) animator.SetBool("Walking", true);
-                        navMeshAgent.destination = pathInfo.paths[indexPath][index];
-                        yield return new WaitForFixedUpdate();
-                        yield return new WaitForFixedUpdate();
-                        yield return new WaitForFixedUpdate();
+                        bool isIncrease = true;
                         while (true)
                         {
-                            if (navMeshAgent.remainingDistance <= 0.15f && pathInfo.isUpdatePosition) animator.SetBool("Walking", false);
-                            if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                            Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
+                            Quaternion targetRotation = Quaternion.LookRotation(direction);
+                            while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                            {
+                                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pathInfo.rotateSpeed);
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            animator.SetBool("Walking", true);
+                            navMeshAgent.destination = pathInfo.paths[indexPath][index];
                             yield return new WaitForFixedUpdate();
+                            yield return new WaitForFixedUpdate();
+                            yield return new WaitForFixedUpdate();
+                            while (true)
+                            {
+                                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            if (index == pathInfo.paths[indexPath].Length - 1 || index == 0) isIncrease = !isIncrease;
+                            if (isIncrease) index++;
+                            else index--;
                         }
-                        yield return new WaitForSeconds(pathInfo.time);
-                        if (index == pathInfo.paths[indexPath].Length - 1 || index == 0) isIncrease = !isIncrease;
-                        if (isIncrease) index++;
-                        else index--;
                     }
                 }
+                else
+                {
+                    if (pathInfo.pathType == GameController.PathType.Circle)
+                    {
+                        while (true)
+                        {
+                            Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
+                            Quaternion targetRotation = Quaternion.LookRotation(direction);
+                            while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                            {
+                                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pathInfo.rotateSpeed);
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            if (index == pathInfo.paths[indexPath].Length - 1) index = 1;
+                            else index++;
+                        }
+                    }
+                    else if (pathInfo.pathType == GameController.PathType.Repeat)
+                    {
+                        bool isIncrease = false;
+                        while (true)
+                        {
+                            Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
+                            Quaternion targetRotation = Quaternion.LookRotation(direction);
+                            while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                            {
+                                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pathInfo.rotateSpeed);
+                                yield return new WaitForFixedUpdate();
+                            }
+                            yield return new WaitForSeconds(pathInfo.time);
+                            if (index == pathInfo.paths[indexPath].Length - 1 || index == 1) isIncrease = !isIncrease;
+                            if (isIncrease) index++;
+                            else index--;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Quaternion targetRotation = Quaternion.Euler(0, pathInfo.angle, 0);
+                while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+                {
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, pathInfo.rotateSpeed);
+                    yield return new WaitForFixedUpdate();
+                }
+                yield return new WaitForSeconds(pathInfo.time);
             }
         }
 
@@ -146,7 +212,8 @@ namespace Hunter
             indexPath = 0;
             hp = startHp;
             transform.position = pathInfo.paths[0][0];
-            transform.rotation = Quaternion.Euler(transform.eulerAngles.x, pathInfo.angle, transform.eulerAngles.z);
+            if (pathInfo.paths[0].Length == 1) transform.rotation = Quaternion.Euler(transform.eulerAngles.x, pathInfo.angle, transform.eulerAngles.z);
+            else if (pathInfo.paths[0].Length > 1) transform.LookAt(pathInfo.paths[0][1]);
         }
     }
 }

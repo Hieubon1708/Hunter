@@ -7,17 +7,13 @@ namespace Hunter
         public GameController.BotType botType;
         public GameController.PathType pathType;
         public float time;
-        [Range(1f, 3f)]
         public float speed;
-        [Range(1f, 3f)]
-        public float rotateSpeed;
-        [Range(1f, 3f)]
+        public float rotateSpeed ;
         public float detectSpeed;
-        [Range(1f, 3f)]
         public float rotateDetectSpeed;
         public Transform[] path;
         public Vector3[][] paths;
-        public bool isUpdatePosition = true;
+        public bool isUpdatePosition;
         public float angle;
 
         public void Start()

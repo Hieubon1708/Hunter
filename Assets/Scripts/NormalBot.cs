@@ -14,10 +14,10 @@ namespace Hunter
                     isFind = true;
                     StopProbe();
                     ChangeSpeed(pathInfo.detectSpeed, pathInfo.rotateDetectSpeed);
+                    questionRotate.Show();
                 }
                 StopLostTrack();
                 navMeshAgent.isStopped = true;
-                navMeshAgent.updatePosition = true;
                 GameObject target = radarView.GetSeenVictim().gameObject;
                 transform.LookAt(target.transform.position);
                 //Debug.LogWarning("Find " + target.name);
@@ -32,6 +32,7 @@ namespace Hunter
                     if (hit.collider.tag == "Player")
                     {
                         StopLostTrack();
+                        animator.SetBool("Walking", true);
                         navMeshAgent.isStopped = false;
                         navMeshAgent.destination = PlayerController.instance.transform.position;
                         //Debug.LogWarning("Ray");
@@ -55,41 +56,55 @@ namespace Hunter
             }
         }
 
-        public GameObject a;
-
         public override IEnumerator LostTrack()
         {
             Debug.LogWarning("Break");
             navMeshAgent.isStopped = false;
             navMeshAgent.destination = PlayerController.instance.transform.position;
+            animator.SetBool("Walking", true);
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
-            yield return new WaitUntil(() => navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance);
+            while (true)
+            {
+                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                yield return new WaitForFixedUpdate();
+            }
             yield return new WaitForSeconds(pathInfo.time);
-            int step = Random.Range(3, 6);
+            int step = Random.Range(2, 4);
             while (step > 0)
             {
                 Vector3 randomDestination = RandomDestinationLostTrack();
                 navMeshAgent.destination = randomDestination;
-                //Instantiate(a, randomDestination, Quaternion.identity);
-                navMeshAgent.updatePosition = Random.Range(0, 5) == 0;
-                Debug.LogError("Position = " + randomDestination + " IsUpdatePosition = " + navMeshAgent.updatePosition + " Step = " + step);
+                animator.SetBool("Walking", true);
+                //Debug.LogError("Position = " + randomDestination + " IsUpdatePosition = " + navMeshAgent.updatePosition + " Step = " + step);
                 yield return new WaitForFixedUpdate();
                 yield return new WaitForFixedUpdate();
                 yield return new WaitForFixedUpdate();
-                yield return new WaitUntil(() => navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance);
+                while (true)
+                {
+                    if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                    if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                    yield return new WaitForFixedUpdate();
+                }
                 yield return new WaitForSeconds(pathInfo.time);
-                navMeshAgent.nextPosition = transform.position;
                 step--;
             }
             isFind = false;
+            questionRotate.Hide();
             navMeshAgent.destination = pathInfo.paths[0][0];
-            navMeshAgent.updatePosition = true;
+            animator.SetBool("Walking", true);
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
-            yield return new WaitUntil(() => navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance);
+            while (true)
+            {
+                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
+                yield return new WaitForFixedUpdate();
+            }
+            yield return new WaitForSeconds(pathInfo.time);
             StartProbe();
         }
 
