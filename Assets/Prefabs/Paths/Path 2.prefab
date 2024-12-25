@@ -48,10 +48,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   botType: 0
   pathType: 0
+  time: 0
   speed: 1
+  rotateSpeed: 1
+  detectSpeed: 1
+  rotateDetectSpeed: 1
   path:
   - {fileID: 778823398143537807}
   isUpdatePosition: 1
+  angle: 0
 --- !u!1 &5850957988646725783
 GameObject:
   m_ObjectHideFlags: 0
@@ -69,7 +74,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3939787602285930141
 Transform:
   m_ObjectHideFlags: 0
@@ -152,7 +157,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4265335000007102902
 Transform:
   m_ObjectHideFlags: 0

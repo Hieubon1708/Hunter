@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using DG.Tweening.Core.Easing;
 using System.Linq;
 using UnityEngine;
 
@@ -22,8 +23,6 @@ namespace Hunter
         private Mesh _mesh;
         private int _layerMask;
         private int _victimLayerMask;
-
-        public Bot bot;
 
         private void OnEnable()
         {
@@ -109,25 +108,7 @@ namespace Hunter
             }
 
             return null;
-        }
-
-        void FixedUpdate()
-        {
-            if (GetSeenVictim() != null)
-            {
-                if (!bot.isFind) bot.Find();
-                GameObject target = GetSeenVictim().gameObject;
-                Debug.LogWarning("Find " + target.name);
-                bot.transform.LookAt(target.transform.position);
-            }
-            else 
-            {
-                if (bot.isFind)
-                {
-
-                }
-            }
-        }
+        }      
 
         private void LateUpdate()
         {

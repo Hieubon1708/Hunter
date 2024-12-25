@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Hunter
 {
@@ -6,9 +6,15 @@ namespace Hunter
     {
         public GameController.BotType botType;
         public GameController.PathType pathType;
+        public float time;
         [Range(1f, 3f)]
         public float speed;
-        public float time;
+        [Range(1f, 3f)]
+        public float rotateSpeed;
+        [Range(1f, 3f)]
+        public float detectSpeed;
+        [Range(1f, 3f)]
+        public float rotateDetectSpeed;
         public Transform[] path;
         public Vector3[][] paths;
         public bool isUpdatePosition = true;
