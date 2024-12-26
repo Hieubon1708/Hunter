@@ -4,16 +4,24 @@ namespace Hunter
 {
     public class WeaponEquip : MonoBehaviour
     {
+        public Weapon scWeapon;
         public GameObject weapon;
         public GameObject[] preWeapons;
-        public Transform container;
 
-        public void Equip(GameObject weapon, GameController.WeaponType weaponType)
+        private void Start()
+        {
+            Equip(GameController.WeaponType.Knife);
+        }
+
+        public void Equip(GameController.WeaponType weaponType)
         {
             if (weapon != null) Destroy(weapon);
-            if (GetPreWeaponByName(weapon.ToString()))
+            GameObject w = GetPreWeaponByName(weaponType.ToString());
+            if (w)
             {
-                weapon = Instantiate(weapon, container);
+                weapon = Instantiate(w, PlayerController.instance.hand);
+                scWeapon = weapon.GetComponent<Weapon>();
+                PlayerController.instance.Init(scWeapon.attackRange);
             }
             else
             {

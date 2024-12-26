@@ -40,6 +40,7 @@ namespace Hunter
 
         public void SubtractHp(int hp)
         {
+            if (this.hp <= 0) return;
             subtractHealthBar.Complete();
             subtractDamagerHealthBar.Complete();
 
@@ -52,6 +53,11 @@ namespace Hunter
             {
                 healthDamagerBar.size = new Vector2(z, healthDamagerBar.size.y);
             }).SetDelay(0.15f);
+
+            if (this.hp <= 0)
+            {
+
+            }
         }
     }
 }

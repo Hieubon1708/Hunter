@@ -22,28 +22,37 @@ namespace Hunter
                 StopLastTrace();
                 radarView.SetColor(Color.red);
                 navMeshAgent.isStopped = true;
+                animator.SetBool("Walking", false);
                 GameObject target = radarView.GetSeenVictim().gameObject;
                 transform.LookAt(target.transform.position);
                 //Debug.LogWarning("Find " + target.name);
-                if(attack == null)
+                if (attack == null)
                 {
+                    Debug.LogWarning("Start");
+
                     StartAttack();
                 }
             }
             else
             {
-                if (attack != null)
-                {
-                    StopAttack();
-                }
-                time += Time.fixedDeltaTime;
-                if(time < 0.6f) return;
                 if (isFind)
                 {
+                    if (attack != null)
+                    {
+                        Debug.LogError("Stop");
+
+                        StopAttack();
+                    }
                     radarView.SetColor(Color.white);
+                    time += Time.fixedDeltaTime;
+                    if (time < 0.6f) return;
                     RaycastHit hit;
-                    Vector3 direction = PlayerController.instance.transform.position - transform.position;
-                    Physics.Raycast(transform.position, direction, out hit);
+                    Vector3 from = transform.position;
+                    Vector3 to = PlayerController.instance.transform.position;
+                    from.y += 0.1f;
+                    to.y += 0.1f;
+                    Vector3 direction = to - from;
+                    Physics.Raycast(from, direction, out hit, 10, playerLayer);
                     if (hit.collider != null && hit.collider.tag == "Player")
                     {
                         StopHear();

@@ -1,4 +1,3 @@
-using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,6 +22,7 @@ namespace Hunter
         public Transform container;
 
         public Camera cam;
+        public WeaponEquip weaponEquip;
 
         public void Awake()
         {

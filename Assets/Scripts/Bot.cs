@@ -29,6 +29,9 @@ namespace Hunter
 
         public GameObject scream;
         protected float time;
+        public ParticleSystem parWeapon;
+        public GameObject laserWeapon;
+        public LayerMask playerLayer;
 
         public void Init(PathInfo pathInfo)
         {
@@ -113,7 +116,13 @@ namespace Hunter
 
         public virtual void SubtractHp(int hp)
         {
-            this.hp -= hp;
+            if (this.hp <= 0) return;
+            this.hp = Mathf.Clamp(this.hp - hp, 0, this.hp);
+
+            if(this.hp <= 0)
+            {
+
+            }
         }
 
         IEnumerator Probe()
@@ -328,22 +337,17 @@ namespace Hunter
             scream.SetActive(false);
         }
 
-        public void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.A))
-            {
-                StartAttack();
-            }
-        }
-
         public IEnumerator Attack()
         {
             animator.SetTrigger("Aiming");
             animator.SetTrigger("Fire");
+            yield return new WaitForSeconds(0.467f);
             while (true)
             {
-                yield return new WaitForSeconds(0.467f);
+                parWeapon.Play();
                 PlayerController.instance.PlayBlood();
+                PlayerController.instance.SubtractHp(damage);
+                yield return new WaitForSeconds(0.467f);
             }
         }
 
@@ -353,8 +357,6 @@ namespace Hunter
             Vector3 randomDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
             int distance = Random.Range(3, 6);
             Debug.DrawLine(transform.position, transform.position + randomDirection * distance, Color.red, 111);
-            //Debug.LogWarning("Angle = " + angle);
-            //Debug.LogWarning("Distance = " + distance);
             return transform.position + randomDirection * distance;
         }
 

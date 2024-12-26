@@ -114,9 +114,11 @@ namespace Hunter
             return StartPosition;
         }
 
+        public bool i;
+
         private void Update()
         {
-            if(PlayerController.instance != null)
+            if(PlayerController.instance != null && !i)
             {
                 Vector3 scaledMovement = Player.speed * Time.deltaTime * new Vector3(
                 MovementAmount.x,
