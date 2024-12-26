@@ -4,14 +4,14 @@ namespace Hunter
 {
     public class ListeningDistance : MonoBehaviour
     {
-        public Vector3 allyPosition;
+        public Bot bot;
 
         public void OnTriggerEnter(Collider other)
         {
-            if (other.CompareTag("Bot"))
+            if (other.CompareTag("Bot") && !bot.isFind)
             {
-                allyPosition = other.transform.parent.position;
-                Debug.Log("Enter " + other.transform.parent.name + " position " + allyPosition);
+                bot.StartHear(other.transform.position);
+                Debug.Log("Enter " + other.transform.parent.name + " position " + other.transform.position);
             }
         }
     }

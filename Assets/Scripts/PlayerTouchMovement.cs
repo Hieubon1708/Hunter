@@ -1,4 +1,3 @@
-using Hunter;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -18,6 +17,11 @@ namespace Hunter
         private Finger MovementFinger;
         private Vector2 MovementAmount;
         private Vector2 center;
+
+        public Vector2 GetMovemntAmount()
+        {
+            return MovementAmount;
+        }
 
         private void Start()
         {
@@ -85,7 +89,7 @@ namespace Hunter
                 MovementFinger = TouchedFinger;
                 MovementAmount = Vector2.zero;
                 Joystick.RectTransform.sizeDelta = JoystickSize;
-                Joystick.RectTransform.anchoredPosition = Input.mousePosition;
+                Joystick.RectTransform.anchoredPosition = ClampStartPosition(Input.mousePosition);
             }
         }
 
@@ -112,14 +116,17 @@ namespace Hunter
 
         private void Update()
         {
-            Vector3 scaledMovement = Player.speed * Time.deltaTime * new Vector3(
+            if(PlayerController.instance != null)
+            {
+                Vector3 scaledMovement = Player.speed * Time.deltaTime * new Vector3(
                 MovementAmount.x,
                 0,
                 MovementAmount.y
             );
 
-            Player.transform.LookAt(Player.transform.position + scaledMovement, Vector3.up);
-            Player.Move(scaledMovement);
+                Player.transform.LookAt(PlayerController.instance.lookAt.transform.position + scaledMovement, Vector3.up);
+                Player.Move(scaledMovement);
+            }
         }
     }
 }

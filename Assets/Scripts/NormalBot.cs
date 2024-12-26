@@ -7,8 +7,10 @@ namespace Hunter
     {
         public override void FixedUpdate()
         {
+            base.FixedUpdate();
             if (radarView.GetSeenVictim() != null)
             {
+                time = 0;
                 if (!isFind)
                 {
                     isFind = true;
@@ -16,103 +18,49 @@ namespace Hunter
                     ChangeSpeed(pathInfo.detectSpeed, pathInfo.rotateDetectSpeed);
                     questionRotate.Show();
                 }
-                StopLostTrack();
+                StopHear();
+                StopLastTrace();
+                radarView.SetColor(Color.red);
                 navMeshAgent.isStopped = true;
                 GameObject target = radarView.GetSeenVictim().gameObject;
                 transform.LookAt(target.transform.position);
                 //Debug.LogWarning("Find " + target.name);
+                if(attack == null)
+                {
+                    StartAttack();
+                }
             }
             else
             {
+                if (attack != null)
+                {
+                    StopAttack();
+                }
+                time += Time.fixedDeltaTime;
+                if(time < 0.6f) return;
                 if (isFind)
                 {
+                    radarView.SetColor(Color.white);
                     RaycastHit hit;
                     Vector3 direction = PlayerController.instance.transform.position - transform.position;
                     Physics.Raycast(transform.position, direction, out hit);
-                    if (hit.collider.tag == "Player")
+                    if (hit.collider != null && hit.collider.tag == "Player")
                     {
-                        StopLostTrack();
-                        animator.SetBool("Walking", true);
+                        StopHear();
+                        StopLastTrace();
                         navMeshAgent.isStopped = false;
+                        animator.SetBool("Walking", true);
                         navMeshAgent.destination = PlayerController.instance.transform.position;
                         //Debug.LogWarning("Ray");
                     }
                     else
                     {
-                        if (lostTrack == null)
+                        if (lastTrace == null && hear == null)
                         {
-                            lostTrack = StartCoroutine(LostTrack());
+                            StartLastTrace();
                         }
                     }
                 }
-            }
-        }
-
-        public override IEnumerator Attack()
-        {
-            while (true)
-            {
-
-            }
-        }
-
-        public override IEnumerator LostTrack()
-        {
-            Debug.LogWarning("Break");
-            navMeshAgent.isStopped = false;
-            navMeshAgent.destination = PlayerController.instance.transform.position;
-            animator.SetBool("Walking", true);
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            while (true)
-            {
-                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
-                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
-                yield return new WaitForFixedUpdate();
-            }
-            yield return new WaitForSeconds(pathInfo.time);
-            int step = Random.Range(2, 4);
-            while (step > 0)
-            {
-                Vector3 randomDestination = RandomDestinationLostTrack();
-                navMeshAgent.destination = randomDestination;
-                animator.SetBool("Walking", true);
-                //Debug.LogError("Position = " + randomDestination + " IsUpdatePosition = " + navMeshAgent.updatePosition + " Step = " + step);
-                yield return new WaitForFixedUpdate();
-                yield return new WaitForFixedUpdate();
-                yield return new WaitForFixedUpdate();
-                while (true)
-                {
-                    if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
-                    if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
-                    yield return new WaitForFixedUpdate();
-                }
-                yield return new WaitForSeconds(pathInfo.time);
-                step--;
-            }
-            isFind = false;
-            questionRotate.Hide();
-            navMeshAgent.destination = pathInfo.paths[0][0];
-            animator.SetBool("Walking", true);
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            while (true)
-            {
-                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
-                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
-                yield return new WaitForFixedUpdate();
-            }
-            yield return new WaitForSeconds(pathInfo.time);
-            StartProbe();
-        }
-
-        public void Update()
-        {
-            if(Input.GetKeyDown(KeyCode.A))
-            {
-                
             }
         }
 

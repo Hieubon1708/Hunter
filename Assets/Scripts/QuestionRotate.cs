@@ -4,19 +4,19 @@ namespace Hunter
 {
     public class QuestionRotate : MonoBehaviour
     {
-        public Animation animation;
+        public Animation ani;
 
         public void Show()
         {
-            animation.Play("ShowQuestion");
+            ani.Play("ShowQuestion");
         }
         
         public void Hide()
         {
-            animation.Play("HideQuestion");
+            ani.Play("HideQuestion");
         }
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
             if(GameController.instance != null && transform.localScale != Vector3.zero)
             {

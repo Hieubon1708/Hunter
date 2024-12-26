@@ -1,6 +1,5 @@
-﻿using DG.Tweening;
-using DG.Tweening.Core.Easing;
-using System.Linq;
+﻿using System.Linq;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 
 namespace Hunter
@@ -23,6 +22,11 @@ namespace Hunter
         private Mesh _mesh;
         private int _layerMask;
         private int _victimLayerMask;
+
+        public void SetColor(Color color)
+        {
+            _meshRenderer.material.color = color;
+        }
 
         private void OnEnable()
         {
@@ -103,15 +107,18 @@ namespace Hunter
             {
                 if (Physics.Linecast(transform.position, Convert(_tempVertices[i]), out hit, _victimLayerMask))
                 {
+                    //Debug.LogWarning(hit.collider.name);
                     return hit.collider;
                 }
             }
 
             return null;
-        }      
+        }
 
         private void LateUpdate()
         {
+            //transform.localRotation = Quaternion.identity;
+
             if (_isEven && Time.frameCount % 2 == 0)
                 return;
 

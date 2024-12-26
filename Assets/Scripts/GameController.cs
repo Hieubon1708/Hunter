@@ -38,10 +38,15 @@ namespace Hunter
         {
             Normal, Sniper, Boss
         }
-        
+
         public enum PathType
         {
             Repeat, Circle
+        }
+
+        public enum WeaponType
+        {
+            Knife
         }
 
         void Update()
@@ -62,9 +67,30 @@ namespace Hunter
             GameObject map = Instantiate(Resources.Load<GameObject>(level.ToString()));
         }
 
-        public void Replay()
+        public Bot GetBot(GameObject bot)
         {
-
+            for (int i = 0; i < poolNormalBots.Count; i++)
+            {
+                if (poolNormalBots[i].gameObject == bot)
+                {
+                    return poolNormalBots[i];
+                }
+            }
+            for (int i = 0; i < poolSniperBots.Count; i++)
+            {
+                if (poolSniperBots[i].gameObject == bot)
+                {
+                    return poolSniperBots[i];
+                }
+            }
+            for (int i = 0; i < poolBoosBots.Count; i++)
+            {
+                if (poolBoosBots[i].gameObject == bot)
+                {
+                    return poolBoosBots[i];
+                }
+            }
+            return null;
         }
 
         void ResetBots()
