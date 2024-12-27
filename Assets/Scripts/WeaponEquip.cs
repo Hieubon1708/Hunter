@@ -10,23 +10,23 @@ namespace Hunter
 
         private void Start()
         {
-            Equip(GameController.WeaponType.Knife);
+            //Equip(GameController.WeaponType.Knife);
         }
 
         public void Equip(GameController.WeaponType weaponType)
         {
-            if (weapon != null) Destroy(weapon);
+            /*if (weapon != null) Destroy(weapon);
             GameObject w = GetPreWeaponByName(weaponType.ToString());
             if (w)
             {
-                weapon = Instantiate(w, PlayerController.instance.hand);
+                weapon = Instantiate(w, Player.instance.hand);
                 scWeapon = weapon.GetComponent<Weapon>();
-                PlayerController.instance.Init(scWeapon.attackRange);
+                Player.instance.Init(scWeapon.attackRange);
             }
             else
             {
                 Debug.LogError("Not found!");
-            }
+            }*/
         }
 
         GameObject GetPreWeaponByName(string name)

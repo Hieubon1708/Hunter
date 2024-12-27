@@ -6,6 +6,11 @@ namespace Hunter
 {
     public class SniperBot : Bot
     {
+        public override IEnumerator Attack()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public override void FixedUpdate()
         {
             throw new System.NotImplementedException();

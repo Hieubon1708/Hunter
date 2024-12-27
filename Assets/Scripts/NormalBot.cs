@@ -5,12 +5,16 @@ namespace Hunter
 {
     public class NormalBot : Bot
     {
+        public ParticleSystem parWeapon;
+        public GameObject laserWeapon;
+
         public override void FixedUpdate()
         {
+            if(!col.enabled) return;
             base.FixedUpdate();
             if (radarView.GetSeenVictim() != null)
             {
-                time = 0;
+                timeOff = 0;
                 if (!isFind)
                 {
                     isFind = true;
@@ -28,8 +32,7 @@ namespace Hunter
                 //Debug.LogWarning("Find " + target.name);
                 if (attack == null)
                 {
-                    Debug.LogWarning("Start");
-
+                    //Debug.LogWarning("Start");
                     StartAttack();
                 }
             }
@@ -39,13 +42,12 @@ namespace Hunter
                 {
                     if (attack != null)
                     {
-                        Debug.LogError("Stop");
-
+                        //Debug.LogError("Stop");
                         StopAttack();
                     }
                     radarView.SetColor(Color.white);
-                    time += Time.fixedDeltaTime;
-                    if (time < 0.6f) return;
+                    timeOff += Time.fixedDeltaTime;
+                    if (timeOff < 0.6f) return;
                     RaycastHit hit;
                     Vector3 from = transform.position;
                     Vector3 to = PlayerController.instance.transform.position;
@@ -70,6 +72,20 @@ namespace Hunter
                         }
                     }
                 }
+            }
+        }
+
+        public override IEnumerator Attack()
+        {
+            animator.SetTrigger("Aiming");
+            animator.SetTrigger("Fire");
+            yield return new WaitForSeconds(0.467f);
+            while (true)
+            {
+                parWeapon.Play();
+               /* PlayerController.instance.PlayBlood();
+                PlayerController.instance.SubtractHp(damage);*/
+                yield return new WaitForSeconds(0.467f);
             }
         }
 

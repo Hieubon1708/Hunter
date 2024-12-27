@@ -19,7 +19,8 @@ namespace Hunter
         public GameObject preSniperBot;
         public GameObject preBossBot;
 
-        public Transform container;
+        public Transform poolModel;
+        public Transform poolWeapon;
 
         public Camera cam;
         public WeaponEquip weaponEquip;
@@ -65,6 +66,7 @@ namespace Hunter
         {
             ResetGame();
             GameObject map = Instantiate(Resources.Load<GameObject>(level.ToString()));
+            ResetBots();
         }
 
         public Bot GetBot(GameObject bot)
@@ -116,7 +118,7 @@ namespace Hunter
             {
                 if (indexNormalBot == poolNormalBots.Count)
                 {
-                    poolNormalBots.Add(Instantiate(preNormalBot, container).GetComponent<NormalBot>());
+                    poolNormalBots.Add(Instantiate(preNormalBot, poolModel).GetComponent<NormalBot>());
                 }
                 poolNormalBots[indexNormalBot].Init(pathInfo);
                 indexNormalBot++;

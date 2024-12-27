@@ -18,8 +18,11 @@ namespace Hunter
         public NavMeshAgent navMeshAgent;
         public PathInfo pathInfo;
         public ParticleSystem blood;
+        public CapsuleCollider col;
+        public Rigidbody[] rbs;
 
         public bool isFind;
+        protected float timeOff;
 
         protected Coroutine probe;
         protected Coroutine attack;
@@ -27,11 +30,10 @@ namespace Hunter
         protected Coroutine lastTrace;
         protected Coroutine hear;
 
-        public GameObject scream;
-        protected float time;
-        public ParticleSystem parWeapon;
-        public GameObject laserWeapon;
         public LayerMask playerLayer;
+
+        public GameObject scream;
+        public GameObject weapon;          
 
         public void Init(PathInfo pathInfo)
         {
@@ -90,6 +92,8 @@ namespace Hunter
 
         public void StartAttack()
         {
+            animator.ResetTrigger("NoAiming");
+            animator.ResetTrigger("Fire");
             attack = StartCoroutine(Attack());
         }
 
@@ -119,9 +123,20 @@ namespace Hunter
             if (this.hp <= 0) return;
             this.hp = Mathf.Clamp(this.hp - hp, 0, this.hp);
 
-            if(this.hp <= 0)
+            if (this.hp <= 0)
             {
+                StopHear();
+                StopProbe();
+                StopAttack();
+                StopLastTrace();
+                StopLostTrack();
 
+                col.enabled = false;
+                animator.enabled = false;
+                navMeshAgent.enabled = false;
+                radarView.gameObject.SetActive(false);
+                questionRotate.Hide();
+                IsKinematic(false);
             }
         }
 
@@ -263,8 +278,8 @@ namespace Hunter
         public IEnumerator LostTrack()
         {
             Debug.LogWarning("LostTrack");
-            navMeshAgent.destination = PlayerController.instance.transform.position;
-            animator.SetBool("Walking", true);
+            //navMeshAgent.destination = Player.instance.transform.position;
+            //animator.SetBool("Walking", true);
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
@@ -316,7 +331,7 @@ namespace Hunter
             Debug.LogWarning("LastTrace");
             navMeshAgent.isStopped = false;
             animator.SetBool("Walking", true);
-            navMeshAgent.destination = PlayerController.instance.transform.position;
+            //navMeshAgent.destination = Player.instance.transform.position;
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
@@ -337,19 +352,7 @@ namespace Hunter
             scream.SetActive(false);
         }
 
-        public IEnumerator Attack()
-        {
-            animator.SetTrigger("Aiming");
-            animator.SetTrigger("Fire");
-            yield return new WaitForSeconds(0.467f);
-            while (true)
-            {
-                parWeapon.Play();
-                PlayerController.instance.PlayBlood();
-                PlayerController.instance.SubtractHp(damage);
-                yield return new WaitForSeconds(0.467f);
-            }
-        }
+        public abstract IEnumerator Attack();
 
         public Vector3 RandomDestinationLostTrack()
         {
@@ -360,6 +363,15 @@ namespace Hunter
             return transform.position + randomDirection * distance;
         }
 
+        void IsKinematic(bool isKinematic)
+        {
+            if (rbs.Length == 0) rbs = GetComponentsInChildren<Rigidbody>();
+            for (int i = 0; i < rbs.Length; i++)
+            {
+                rbs[i].isKinematic = isKinematic;
+            }
+        }
+
         public void PlayBlood()
         {
             blood.Play();
@@ -367,8 +379,13 @@ namespace Hunter
 
         public void ResetBot()
         {
-            indexPath = 0;
             hp = startHp;
+            indexPath = 0;
+            IsKinematic(true);
+            col.enabled = true;
+            animator.enabled = true;
+            navMeshAgent.enabled = true;
+            radarView.gameObject.SetActive(true);
             transform.position = pathInfo.paths[0][0];
             if (pathInfo.paths[0].Length == 1) transform.rotation = Quaternion.Euler(transform.eulerAngles.x, pathInfo.angle, transform.eulerAngles.z);
             else if (pathInfo.paths[0].Length > 1) transform.LookAt(pathInfo.paths[0][1]);

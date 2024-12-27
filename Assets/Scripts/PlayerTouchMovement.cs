@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -12,7 +13,7 @@ namespace Hunter
         [SerializeField]
         private FloatingJoystick Joystick;
         [SerializeField]
-        private NavMeshAgent Player;
+        private NavMeshAgent navMeshAgent;
 
         private Finger MovementFinger;
         private Vector2 MovementAmount;
@@ -114,21 +115,13 @@ namespace Hunter
             return StartPosition;
         }
 
-        public bool i;
-
         private void Update()
         {
-            if(PlayerController.instance != null && !i)
-            {
-                Vector3 scaledMovement = Player.speed * Time.deltaTime * new Vector3(
-                MovementAmount.x,
-                0,
-                MovementAmount.y
-            );
-
-                Player.transform.LookAt(PlayerController.instance.lookAt.transform.position + scaledMovement, Vector3.up);
-                Player.Move(scaledMovement);
-            }
+            Vector3 scaledMovement = navMeshAgent.speed * Time.deltaTime * new Vector3(
+            MovementAmount.x,
+            0,
+            MovementAmount.y);
+            navMeshAgent.Move(scaledMovement);
         }
     }
 }
