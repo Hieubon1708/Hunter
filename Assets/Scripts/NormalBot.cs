@@ -10,8 +10,9 @@ namespace Hunter
 
         public override void FixedUpdate()
         {
-            if(!col.enabled) return;
+            if (!col.enabled || GameController.instance.isReseting) return;
             base.FixedUpdate();
+            GameObject target = null;
             if (radarView.GetSeenVictim() != null)
             {
                 timeOff = 0;
@@ -24,16 +25,17 @@ namespace Hunter
                 }
                 StopHear();
                 StopLastTrace();
+                StopLostTrack();
                 radarView.SetColor(Color.red);
                 navMeshAgent.isStopped = true;
                 animator.SetBool("Walking", false);
-                GameObject target = radarView.GetSeenVictim().gameObject;
+                target = radarView.GetSeenVictim().gameObject;
                 transform.LookAt(target.transform.position);
-                //Debug.LogWarning("Find " + target.name);
+                //Debug.LogError("Find " + target.name);
                 if (attack == null)
                 {
                     //Debug.LogWarning("Start");
-                    StartAttack();
+                    StartAttack(target);
                 }
             }
             else
@@ -45,7 +47,7 @@ namespace Hunter
                         //Debug.LogError("Stop");
                         StopAttack();
                     }
-                    radarView.SetColor(Color.white);
+                    radarView.SetColor(new Vector4(1, 1, 1, 70f / 255f));
                     timeOff += Time.fixedDeltaTime;
                     if (timeOff < 0.6f) return;
                     RaycastHit hit;
@@ -68,33 +70,36 @@ namespace Hunter
                     {
                         if (lastTrace == null && hear == null)
                         {
-                            StartLastTrace();
+                            StartLastTrace(target);
                         }
                     }
                 }
             }
         }
 
-        public override IEnumerator Attack()
+        public override IEnumerator Attack(GameObject target)
         {
+            isKilling = true;
+            Player player = GameController.instance.GetPoppy(target);
             animator.SetTrigger("Aiming");
             animator.SetTrigger("Fire");
             yield return new WaitForSeconds(0.467f);
-            while (true)
+            while (player.col.enabled)
             {
                 parWeapon.Play();
-               /* PlayerController.instance.PlayBlood();
-                PlayerController.instance.SubtractHp(damage);*/
+                player.PlayBlood();
+                player.Die(transform);
                 yield return new WaitForSeconds(0.467f);
             }
+            StopAttack();
         }
 
         public override void SubtractHp(int hp)
         {
+            if (this.hp <= 0) return;
             base.SubtractHp(hp);
             if (this.hp <= 0)
             {
-                Debug.LogWarning("Die");
                 StartCoroutine(Die());
             }
         }

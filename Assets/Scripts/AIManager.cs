@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Hunter
 {
@@ -21,7 +20,6 @@ namespace Hunter
 
         public Transform Target;
         public float RadiusAroundTarget = 0.5f;
-        public List<AIUnit> Units = new List<AIUnit>();
 
         private void Awake()
         {
@@ -41,13 +39,36 @@ namespace Hunter
 
         private void MakeAgentsCircleTarget()
         {
-            for (int i = 0; i < Units.Count; i++)
+            if (GameController.instance.poppies.Count == 0) return;
+            if (GameController.instance.poppies.Count == 1)
             {
-                Units[i].MoveTo(new Vector3(
-                    Target.position.x + RadiusAroundTarget * Mathf.Cos(2 * Mathf.PI * i / Units.Count),
-                    Target.position.y,
-                    Target.position.z + RadiusAroundTarget * Mathf.Sin(2 * Mathf.PI * i / Units.Count)
-                    ));
+                for (int i = 0; i < GameController.instance.poppies.Count; i++)
+                {
+                    GameController.instance.poppies[i].aIUnit.MoveTo(Target.position, RadiusAroundTarget);
+                }
+            }
+            else
+            {
+                float mulRadius = 0;
+                for (int i = 0; i < GameController.instance.poppies.Count; i++)
+                {
+                    float mulI = i;
+                    if (i >= 4)
+                    {
+                        mulRadius = 0.75f;
+                        mulI = mulI - 4 + 0.5f;
+                    }
+                    if (i >= 8)
+                    {
+                        mulRadius = 1f;
+                        mulI = mulI - 8 + 0.5f;
+                    }
+                    GameController.instance.poppies[i].aIUnit.MoveTo(new Vector3(
+                   Target.position.x + (RadiusAroundTarget + mulRadius + GameController.instance.poppies[i].aIUnit.extraX) * Mathf.Cos(2 * Mathf.PI * mulI / 4),
+                   Target.position.y,
+                   Target.position.z + +(RadiusAroundTarget + mulRadius + GameController.instance.poppies[i].aIUnit.extraY) * Mathf.Sin(2 * Mathf.PI * mulI / 4)
+                   ), RadiusAroundTarget + mulRadius);
+                }
             }
         }
     }

@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.InputSystem.EnhancedTouch;
-using ETouch = UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.UIElements;
 
 namespace Hunter
 {
@@ -13,90 +11,62 @@ namespace Hunter
         [SerializeField]
         private FloatingJoystick Joystick;
         [SerializeField]
-        private NavMeshAgent navMeshAgent;
 
-        private Finger MovementFinger;
-        private Vector2 MovementAmount;
-        private Vector2 center;
+        public Vector2 MovementAmount;
+
+        public RectTransform canvas;
+        public NavMeshAgent navMeshAgent;
 
         public Vector2 GetMovemntAmount()
         {
             return MovementAmount;
         }
 
-        private void Start()
+        public void HandleFingerMove()
         {
-            center = new Vector2(Screen.width / 2, 400);
-            Joystick.RectTransform.anchoredPosition = center;
-        }
-
-        private void OnEnable()
-        {
-            EnhancedTouchSupport.Enable(); // starting with Unity 2022 this does not work! You need to attach a TouchSimulation.cs script to your player
-            ETouch.Touch.onFingerDown += HandleFingerDown;
-            ETouch.Touch.onFingerUp += HandleLoseFinger;
-            ETouch.Touch.onFingerMove += HandleFingerMove;
-        }
-
-        private void OnDisable()
-        {
-            ETouch.Touch.onFingerDown -= HandleFingerDown;
-            ETouch.Touch.onFingerUp -= HandleLoseFinger;
-            ETouch.Touch.onFingerMove -= HandleFingerMove;
-            EnhancedTouchSupport.Disable(); // You need to attach a TouchSimulation.cs script to your player
-        }
-
-        private void HandleFingerMove(Finger MovedFinger)
-        {
-            if (MovedFinger == MovementFinger)
+            if (GameController.instance.poppies.Count == 0) return;
+            Vector2 knobPosition;
+            float maxMovement = JoystickSize.x / 2f;
+            Vector2 clickPosition = Vector2.zero;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, Input.mousePosition, null, out clickPosition);
+            Vector2 touchPos = new Vector2(clickPosition.x, clickPosition.y + canvas.sizeDelta.y / 2);
+            if (Vector2.Distance(
+                touchPos,
+                    Joystick.RectTransform.anchoredPosition
+                ) > maxMovement)
             {
-                Vector2 knobPosition;
-                float maxMovement = JoystickSize.x / 2f;
-                ETouch.Touch currentTouch = MovedFinger.currentTouch;
-                if (Vector2.Distance(
-                        currentTouch.screenPosition,
-                        Joystick.RectTransform.anchoredPosition
-                    ) > maxMovement)
-                {
-                    knobPosition = (
-                        currentTouch.screenPosition - Joystick.RectTransform.anchoredPosition
-                        ).normalized
-                        * maxMovement;
-                }
-                else
-                {
-                    knobPosition = currentTouch.screenPosition - Joystick.RectTransform.anchoredPosition;
-                }
-                Joystick.Knob.anchoredPosition = knobPosition;
-                MovementAmount = knobPosition / maxMovement;
+                knobPosition = (
+                    touchPos - Joystick.RectTransform.anchoredPosition
+                    ).normalized
+                    * maxMovement;
             }
+            else
+            {
+                knobPosition = touchPos - Joystick.RectTransform.anchoredPosition;
+            }
+            Joystick.Knob.anchoredPosition = knobPosition;
+            MovementAmount = knobPosition / maxMovement;
         }
 
-        private void HandleLoseFinger(Finger LostFinger)
+        public void HandleLoseFinger()
         {
-            if (LostFinger == MovementFinger)
-            {
-                MovementFinger = null;
-                Joystick.Knob.anchoredPosition = Vector2.zero;
-                MovementAmount = Vector2.zero;
-                Joystick.RectTransform.anchoredPosition = center;
-            }
+            Joystick.Knob.anchoredPosition = Vector2.zero;
+            MovementAmount = Vector2.zero;
+            Joystick.RectTransform.anchoredPosition = new Vector2(0, 350);
         }
 
-        private void HandleFingerDown(Finger TouchedFinger)
+        public void HandleFingerDown()
         {
-            if (MovementFinger == null)
-            {
-                MovementFinger = TouchedFinger;
-                MovementAmount = Vector2.zero;
-                Joystick.RectTransform.sizeDelta = JoystickSize;
-                Joystick.RectTransform.anchoredPosition = ClampStartPosition(Input.mousePosition);
-            }
+            Vector2 clickPosition;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, Input.mousePosition, null, out clickPosition);
+            MovementAmount = Vector2.zero;
+            Joystick.RectTransform.sizeDelta = JoystickSize;
+            Joystick.RectTransform.anchoredPosition = ClampStartPosition(new Vector2(clickPosition.x, clickPosition.y + canvas.sizeDelta.y / 2));
         }
 
         private Vector2 ClampStartPosition(Vector2 StartPosition)
         {
-            if (StartPosition.x < JoystickSize.x / 2)
+            /*if (StartPosition.x < JoystickSize.x / 2)
             {
                 StartPosition.x = JoystickSize.x / 2;
             }
@@ -111,17 +81,27 @@ namespace Hunter
             else if (StartPosition.y > Screen.height - JoystickSize.y / 2)
             {
                 StartPosition.y = Screen.height - JoystickSize.y / 2;
-            }
+            }*/
             return StartPosition;
         }
 
+        public Vector3 scaledMovement;
+        public Rigidbody rb;
+
         private void Update()
         {
-            Vector3 scaledMovement = navMeshAgent.speed * Time.deltaTime * new Vector3(
-            MovementAmount.x,
-            0,
-            MovementAmount.y);
+            if (GameController.instance.poppies.Count == 0) return;
+            scaledMovement = navMeshAgent.speed * Time.deltaTime * new Vector3(
+           MovementAmount.x,
+           0,
+           MovementAmount.y);
             navMeshAgent.Move(scaledMovement);
+        }
+
+        public bool IsCanMove()
+        {
+            NavMeshHit hit;
+            return NavMesh.SamplePosition(navMeshAgent.transform.position + scaledMovement, out hit, 0.0001f, NavMesh.AllAreas);
         }
     }
 }

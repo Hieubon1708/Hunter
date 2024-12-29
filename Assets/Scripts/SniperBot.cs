@@ -6,7 +6,7 @@ namespace Hunter
 {
     public class SniperBot : Bot
     {
-        public override IEnumerator Attack()
+        public override IEnumerator Attack(GameObject target)
         {
             throw new System.NotImplementedException();
         }

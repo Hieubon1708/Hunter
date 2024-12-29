@@ -6,7 +6,7 @@ namespace Hunter
 {
     public class BossBot : Bot
     {
-        public override IEnumerator Attack()
+        public override IEnumerator Attack(GameObject poppy)
         {
             throw new System.NotImplementedException();
         }

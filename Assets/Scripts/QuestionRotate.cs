@@ -4,10 +4,12 @@ namespace Hunter
 {
     public class QuestionRotate : MonoBehaviour
     {
+        public Bot bot;
         public Animation ani;
 
         public void Show()
         {
+            if (!bot.col.enabled) return;
             ani.Play("ShowQuestion");
         }
         

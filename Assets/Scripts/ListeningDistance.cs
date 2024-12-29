@@ -10,7 +10,7 @@ namespace Hunter
         {
             if (other.CompareTag("Bot") && !bot.isFind)
             {
-                bot.StartHear(other.transform.position);
+                bot.StartHear(other.gameObject);
                 Debug.Log("Enter " + other.transform.parent.name + " position " + other.transform.position);
             }
         }

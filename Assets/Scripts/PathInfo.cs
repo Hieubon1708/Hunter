@@ -16,7 +16,7 @@ namespace Hunter
         public bool isUpdatePosition;
         public float angle;
 
-        public void Start()
+        public void Awake()
         {
             Init();
         }

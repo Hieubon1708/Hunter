@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 
 namespace Hunter
@@ -107,7 +106,6 @@ namespace Hunter
             {
                 if (Physics.Linecast(transform.position, Convert(_tempVertices[i]), out hit, _victimLayerMask))
                 {
-                    //Debug.LogWarning(hit.collider.name);
                     return hit.collider;
                 }
             }

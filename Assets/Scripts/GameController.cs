@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,23 +8,28 @@ namespace Hunter
     {
         public static GameController instance;
 
-        public List<NormalBot> poolNormalBots;
-        public List<SniperBot> poolSniperBots;
-        public List<BossBot> poolBoosBots;
-
-        public int indexNormalBot;
-        public int indexSniperBot;
-        public int indexBoosBot;
-
         public GameObject preNormalBot;
         public GameObject preSniperBot;
         public GameObject preBossBot;
 
-        public Transform poolModel;
-        public Transform poolWeapon;
+        public Transform poolEnemy;
+        public Transform poolPoppy;
 
         public Camera cam;
         public WeaponEquip weaponEquip;
+
+        public List<Bot> bots;
+        public List<Bot> botsReserve;
+        public PathInfo[] pathInfos;
+
+        public bool isReseting;
+
+        public List<PoppyType> poppyTypes;
+        public List<Player> poppiesReserve;
+        public List<Player> poppies;
+        public GameObject[] prePoppies;
+
+        public CinemachineVirtualCamera camFollow;
 
         public void Awake()
         {
@@ -32,6 +38,8 @@ namespace Hunter
 
         public void Start()
         {
+            LoadPoppy();
+            LoadWeaponPoppies(WeaponType.Knife);
             LoadLevel(1);
         }
 
@@ -50,6 +58,11 @@ namespace Hunter
             Knife
         }
 
+        public enum PoppyType
+        {
+            Poppy, Bobby, Bubba, Catnap, Craftycorn, Hoppy, Kickin, Pickypiggy
+        }
+
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.S))
@@ -64,72 +77,150 @@ namespace Hunter
 
         public void LoadLevel(int level)
         {
-            ResetGame();
+            if (bots.Count > 0)
+            {
+                for (int i = 0; i < poolEnemy.childCount; i++)
+                {
+                    Destroy(poolEnemy.GetChild(i));
+                }
+            }
+            bots.Clear();
+            PlayerController.instance.ResetGame();
             GameObject map = Instantiate(Resources.Load<GameObject>(level.ToString()));
+            pathInfos = map.GetComponentsInChildren<PathInfo>();
+            poppiesReserve = new List<Player>(poppies);
+            botsReserve = new List<Bot>(bots);
             ResetBots();
+            StartBots();
+            LoadUI();
         }
 
-        public Bot GetBot(GameObject bot)
+        void LoadPoppy()
         {
-            for (int i = 0; i < poolNormalBots.Count; i++)
+            for (int i = 0; i < poppyTypes.Count; i++)
             {
-                if (poolNormalBots[i].gameObject == bot)
-                {
-                    return poolNormalBots[i];
-                }
+                AddPoppy(poppyTypes[i]);
             }
-            for (int i = 0; i < poolSniperBots.Count; i++)
+        }
+
+        public void RemovePoppy(Player poppy)
+        {
+            poppies.Remove(poppy);
+            if(poppies.Count == 0)
             {
-                if (poolSniperBots[i].gameObject == bot)
-                {
-                    return poolSniperBots[i];
-                }
+                PlayerController.instance.Lose();
             }
-            for (int i = 0; i < poolBoosBots.Count; i++)
+        }
+
+        void LoadWeaponPoppies(WeaponType weaponType)
+        {
+            for (int i = 0; i < poppies.Count; i++)
             {
-                if (poolBoosBots[i].gameObject == bot)
+                poppies[i].LoadWeapon(weaponType);
+            }
+        }
+
+        public Player GetPoppy(GameObject poppy)
+        {
+            for (int i = 0; i < poppies.Count; i++)
+            {
+                if (poppies[i].gameObject == poppy)
                 {
-                    return poolBoosBots[i];
+                    return poppies[i];
                 }
             }
             return null;
         }
 
-        void ResetBots()
+        void LoadWeaponPoppy(WeaponType weaponType, Player player)
         {
-            for (int i = 0; i < poolNormalBots.Count; i++)
+            player.LoadWeapon(weaponType);
+        }
+
+        Player AddPoppy(PoppyType poppyType)
+        {
+            GameObject p = Instantiate(prePoppies[(int)poppyType], poolPoppy);
+            Player sc = p.GetComponent<Player>();
+            poppies.Add(sc);
+            return sc;
+        }
+
+        void RemovePoppies()
+        {
+            for (int i = 0; i < poppies.Count; i++)
             {
-                poolNormalBots[i].ResetBot();
-            }
-            for (int i = 0; i < poolSniperBots.Count; i++)
-            {
-                poolSniperBots[i].ResetBot();
-            }
-            for (int i = 0; i < poolBoosBots.Count; i++)
-            {
-                poolBoosBots[i].ResetBot();
+                if (!poppies[i].gameObject.activeSelf)
+                {
+                    Destroy(poppies[i].gameObject);
+                }
             }
         }
 
+        void LoadUI()
+        {
+            UIController.instance.LoadUI();
+        }
+
+        public Bot GetBot(GameObject bot)
+        {
+            for (int i = 0; i < bots.Count; i++)
+            {
+                if (bots[i].gameObject == bot)
+                {
+                    return bots[i];
+                }
+            }
+            return null;
+        }
+
+        public void RemoveBot(GameObject bot)
+        {
+            for (int i = 0; i < bots.Count; i++)
+            {
+                if (bots[i].gameObject == bot)
+                {
+                    bots.RemoveAt(i);
+                }
+            }
+        }
+
+        public void ResetBots()
+        {
+            for (int i = 0; i < bots.Count; i++)
+            {
+                bots[i].ResetBot();
+            }
+        }
 
         public void SetBot(BotType botType, PathInfo pathInfo)
         {
             if (botType == BotType.Normal)
             {
-                if (indexNormalBot == poolNormalBots.Count)
-                {
-                    poolNormalBots.Add(Instantiate(preNormalBot, poolModel).GetComponent<NormalBot>());
-                }
-                poolNormalBots[indexNormalBot].Init(pathInfo);
-                indexNormalBot++;
+                bots.Add(Instantiate(preNormalBot, poolEnemy).GetComponent<Bot>());
+                bots[bots.Count - 1].Init(pathInfo);
             }
         }
 
-        public void ResetGame()
+        public void StartBots()
         {
-            indexNormalBot = 0;
-            indexSniperBot = 0;
-            indexBoosBot = 0;
+            for (int i = 0; i < bots.Count; i++)
+            {
+                bots[i].StartProbe();
+            }
+        }
+
+        public void Replay()
+        {
+            bots =  new List<Bot>(botsReserve);
+            poppies = new List<Player>(poppiesReserve);
+            ResetBots();
+            StartBots();
+            LoadUI();
+            PlayerController.instance.ResetGame();
+            for (int i = 0; i < poppies.Count; i++)
+            {
+                poppies[i].ResetPlayer();
+            }
         }
     }
 }

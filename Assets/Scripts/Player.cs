@@ -14,14 +14,35 @@ namespace Hunter
         public Transform hand;
         public LayerMask botLayer;
         public bool isKilling;
+        public Transform hips;
+        public Rigidbody[] rbs;
+        public CapsuleCollider col;
+        public Weapon weapon;
+        public AIUnit aIUnit;
+        public float xExtraRadius;
+        public float yExtraRadius;
+        Tween delayKill;
 
-        public void Init(float attackRange)
+        private void Start()
         {
-            attackRangeCollider.radius = attackRange;
-        }      
+            rbs = hips.GetComponentsInChildren<Rigidbody>();
+            IsKinematic(true);
+        }
+
+        public void Init(Weapon weapon)
+        {
+            this.weapon = weapon;
+            attackRangeCollider.radius = weapon.attackRange;
+        }
+
+        public void LoadWeapon(GameController.WeaponType weaponType)
+        {
+            GameController.instance.weaponEquip.Equip(this, weaponType);
+        }
 
         public void OnTriggerStay(Collider other)
         {
+            if (!col.enabled) return;
             if (!isKilling && other.CompareTag("Bot"))
             {
                 RaycastHit hit;
@@ -33,22 +54,47 @@ namespace Hunter
                 Physics.Raycast(from, direction, out hit, 10);
                 if (hit.collider != null && hit.collider.tag == "Bot")
                 {
+                    //Debug.LogError("isKilling");
                     isKilling = true;
-                    //Debug.LogWarning(other.name);
-                    animator.SetTrigger("Hit");
                     lookAt = other.gameObject;
-                    Invoke("ChangeLookAt", 0.5f);
+
                     Bot bot = GameController.instance.GetBot(other.gameObject);
-                    DOVirtual.DelayedCall(0.35f, delegate
+                    animator.SetTrigger("Hit");
+                    Invoke("ChangeLookAt", 0.5f);
+                    delayKill = DOVirtual.DelayedCall(0.35f, delegate
                     {
-                        bot.PlayBlood();
-                        bot.SubtractHp(GameController.instance.weaponEquip.scWeapon.damage);
-                        DOVirtual.DelayedCall(0.35f, delegate
+                        bot.SubtractHp(weapon.damage);
+                        delayKill = DOVirtual.DelayedCall(0.35f, delegate
                         {
                             isKilling = false;
                         });
                     });
                 }
+            }
+        }
+
+        public void Die(Transform killer)
+        {
+            GameController.instance.RemovePoppy(this);
+            delayKill.Kill();
+            CancelInvoke("ChangeLookAt");
+            UIController.instance.HitCancel();
+            col.enabled = false;
+            animator.enabled = false;
+            navMeshAgent.enabled = false;
+            IsKinematic(false);
+            Vector3 dir = PlayerController.instance.transform.position - killer.position;
+            for (int i = 0; i < rbs.Length; i++)
+            {
+                rbs[i].AddForce(new Vector3(dir.x, dir.y + 0.5f, dir.z) * 1.5f, ForceMode.Impulse);
+            }
+        }
+
+        void IsKinematic(bool isKinematic)
+        {
+            for (int i = 0; i < rbs.Length; i++)
+            {
+                rbs[i].isKinematic = isKinematic;
             }
         }
 
@@ -62,8 +108,26 @@ namespace Hunter
             blood.Play();
         }
 
-        public void SubtractHp(int hp)
+        public void ResetPlayer()
         {
+            if (transform.position != Vector3.zero)
+            {
+                NavMeshHit hit;
+                if (NavMesh.SamplePosition(Vector3.zero, out hit, 100, NavMesh.AllAreas))
+                {
+                    navMeshAgent.Warp(hit.position);
+                }
+                else Debug.LogWarning("!");
+            }
+            weapon.ResetWeapon();
+            IsKinematic(true);
+            animator.enabled = true;
+            animator.Rebind();
+            ChangeLookAt();
+            navMeshAgent.enabled = true;
+            isKilling = false;
+            transform.rotation = Quaternion.identity;
+            col.enabled = true;
         }
     }
 }
