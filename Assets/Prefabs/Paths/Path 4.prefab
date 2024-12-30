@@ -51,10 +51,10 @@ MonoBehaviour:
   botType: 0
   pathType: 0
   time: 1
-  speed: 1
-  rotateSpeed: 1
-  detectSpeed: 2
-  rotateDetectSpeed: 2
+  speed: 2
+  rotateSpeed: 2
+  detectSpeed: 3
+  rotateDetectSpeed: 3
   path:
   - {fileID: 5170098332558891091}
   isUpdatePosition: 1

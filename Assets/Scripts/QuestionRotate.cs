@@ -15,6 +15,7 @@ namespace Hunter
         
         public void Hide()
         {
+            if(transform.localScale == Vector3.zero) return;
             ani.Play("HideQuestion");
         }
 

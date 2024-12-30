@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,8 +9,6 @@ namespace Hunter
         public static PlayerController instance;
 
         public PlayerTouchMovement playerTouchMovement;
-
-        public GameObject endLayer;
 
         public void Awake()
         {
@@ -23,7 +22,6 @@ namespace Hunter
 
         public void ResetGame()
         {
-            endLayer.SetActive(false);
             if (transform.position != Vector3.zero)
             {
                 NavMeshHit hit;
@@ -47,7 +45,17 @@ namespace Hunter
         public void Lose()
         {
             playerTouchMovement.HandleLoseFinger();
-            endLayer.SetActive(true);
+        }
+
+        public IEnumerator Win(Vector3 endPointPosition)
+        {
+            playerTouchMovement.navMeshAgent.destination = endPointPosition;
+            playerTouchMovement.HandleLoseFinger();
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            yield return new WaitUntil(() => playerTouchMovement.navMeshAgent.remainingDistance == playerTouchMovement.navMeshAgent.stoppingDistance);
+            UIController.instance.ChangeMap();
         }
     }
 }

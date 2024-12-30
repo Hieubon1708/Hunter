@@ -3,15 +3,14 @@ using UnityEngine;
 
 namespace Hunter
 {
-    public class NormalBot : Bot
+    public class NormalBot : SentryBot
     {
         public ParticleSystem parWeapon;
         public GameObject laserWeapon;
 
-        public override void FixedUpdate()
+        public void FixedUpdate()
         {
-            if (!col.enabled || GameController.instance.isReseting) return;
-            base.FixedUpdate();
+            if (!col.enabled || GameController.instance.isResarting) return;
             GameObject target = null;
             if (radarView.GetSeenVictim() != null)
             {
@@ -97,10 +96,35 @@ namespace Hunter
         public override void SubtractHp(int hp)
         {
             if (this.hp <= 0) return;
-            base.SubtractHp(hp);
+            this.hp = Mathf.Clamp(this.hp - hp, 0, this.hp);
             if (this.hp <= 0)
             {
+                StopHear();
+                StopProbe();
+                StopAttack();
+                StopLastTrace();
+                StopLostTrack();
+                PlayBlood();
+
+                UIController.instance.HitEffect();
+                UIController.instance.ShakeCam();
+                isFind = false;
+                col.enabled = false;
+                animator.enabled = false;
+                navMeshAgent.enabled = false;
+                radarView.gameObject.SetActive(false);
+                questionRotate.Hide();
+                IsKinematic(false);
                 StartCoroutine(Die());
+
+                Vector3 dir = transform.position - PlayerController.instance.transform.position;
+                for (int i = 0; i < rbs.Length; i++)
+                {
+                    rbs[i].AddForce(new Vector3(dir.x, dir.y + 1, dir.z) * 7, ForceMode.Impulse);
+                }
+
+                GameController.instance.RemoveBot(gameObject);
+                UIController.instance.gamePlay.UpdateRemainingEnemy();
             }
         }
     }

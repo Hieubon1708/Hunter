@@ -4,7 +4,7 @@ namespace Hunter
 {
     public class ListeningDistance : MonoBehaviour
     {
-        public Bot bot;
+        public SentryBot bot;
 
         public void OnTriggerEnter(Collider other)
         {

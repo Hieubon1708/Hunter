@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UIElements;
@@ -16,6 +17,7 @@ namespace Hunter
 
         public RectTransform canvas;
         public NavMeshAgent navMeshAgent;
+        public CanvasGroup canvasGroup;
 
         public Vector2 GetMovemntAmount()
         {
@@ -24,7 +26,7 @@ namespace Hunter
 
         public void HandleFingerMove()
         {
-            if (GameController.instance.poppies.Count == 0) return;
+            if (GameController.instance.poppies.Count == 0 || UIController.instance.gamePlay.layerCover.activeSelf) return;
             Vector2 knobPosition;
             float maxMovement = JoystickSize.x / 2f;
             Vector2 clickPosition = Vector2.zero;
@@ -48,6 +50,16 @@ namespace Hunter
             MovementAmount = knobPosition / maxMovement;
         }
 
+        public void ShowTouch()
+        {
+            canvasGroup.alpha = 0.5f;
+        }
+
+        public void HideTouch()
+        {
+            canvasGroup.alpha = 0;
+        }
+
         public void HandleLoseFinger()
         {
             Joystick.Knob.anchoredPosition = Vector2.zero;
@@ -57,6 +69,12 @@ namespace Hunter
 
         public void HandleFingerDown()
         {
+            if (UIController.instance.gamePlay.panelStart.activeSelf)
+            {
+                UIController.instance.camAni.Play("CamStartZoom");
+                ShowTouch();
+                UIController.instance.gamePlay.panelStart.SetActive(false);
+            }
             Vector2 clickPosition;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, Input.mousePosition, null, out clickPosition);
             MovementAmount = Vector2.zero;
@@ -102,6 +120,11 @@ namespace Hunter
         {
             NavMeshHit hit;
             return NavMesh.SamplePosition(navMeshAgent.transform.position + scaledMovement, out hit, 0.0001f, NavMesh.AllAreas);
+        }
+
+        public void OnDestroy()
+        {
+            canvasGroup.DOKill();
         }
     }
 }

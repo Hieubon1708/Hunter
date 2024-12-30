@@ -71,6 +71,11 @@ namespace Hunter
                     });
                 }
             }
+            if(GameController.instance.bots.Count == 0 && other.CompareTag("EndPoint") && !UIController.instance.gamePlay.layerCover.activeSelf)
+            {
+                StartCoroutine(PlayerController.instance.Win(other.transform.position));
+                UIController.instance.Win();
+            }
         }
 
         public void Die(Transform killer)
@@ -79,6 +84,7 @@ namespace Hunter
             delayKill.Kill();
             CancelInvoke("ChangeLookAt");
             UIController.instance.HitCancel();
+            UIController.instance.ShakeCancel();
             col.enabled = false;
             animator.enabled = false;
             navMeshAgent.enabled = false;

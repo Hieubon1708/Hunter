@@ -1,4 +1,5 @@
 using Cinemachine;
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace Hunter
         public List<Bot> botsReserve;
         public PathInfo[] pathInfos;
 
-        public bool isReseting;
+        public bool isResarting;
 
         public List<PoppyType> poppyTypes;
         public List<Player> poppiesReserve;
@@ -30,6 +31,7 @@ namespace Hunter
         public GameObject[] prePoppies;
 
         public CinemachineVirtualCamera camFollow;
+        GameObject map;
 
         public void Awake()
         {
@@ -40,7 +42,8 @@ namespace Hunter
         {
             LoadPoppy();
             LoadWeaponPoppies(WeaponType.Knife);
-            LoadLevel(1);
+            PlayerPrefs.DeleteAll();
+            LoadLevel(PlayerPrefs.GetInt("HunterLevel", 1));
         }
 
         public enum BotType
@@ -77,22 +80,25 @@ namespace Hunter
 
         public void LoadLevel(int level)
         {
-            if (bots.Count > 0)
+            isResarting = true;
+            for (int i = 0; i < poolEnemy.childCount; i++)
             {
-                for (int i = 0; i < poolEnemy.childCount; i++)
-                {
-                    Destroy(poolEnemy.GetChild(i));
-                }
+                Destroy(poolEnemy.GetChild(i).gameObject);
             }
-            bots.Clear();
+            if (map != null) Destroy(map);
+            map = Instantiate(Resources.Load<GameObject>(level.ToString()));
             PlayerController.instance.ResetGame();
-            GameObject map = Instantiate(Resources.Load<GameObject>(level.ToString()));
+            for (int i = 0; i < poppies.Count; i++)
+            {
+                poppies[i].ResetPlayer();
+            }
             pathInfos = map.GetComponentsInChildren<PathInfo>();
             poppiesReserve = new List<Player>(poppies);
             botsReserve = new List<Bot>(bots);
             ResetBots();
             StartBots();
             LoadUI();
+            DOVirtual.DelayedCall(0.02f, delegate { isResarting = false; });
         }
 
         void LoadPoppy()
@@ -106,9 +112,10 @@ namespace Hunter
         public void RemovePoppy(Player poppy)
         {
             poppies.Remove(poppy);
-            if(poppies.Count == 0)
+            if (poppies.Count == 0)
             {
                 PlayerController.instance.Lose();
+                UIController.instance.Lose();
             }
         }
 
@@ -197,8 +204,12 @@ namespace Hunter
             if (botType == BotType.Normal)
             {
                 bots.Add(Instantiate(preNormalBot, poolEnemy).GetComponent<Bot>());
-                bots[bots.Count - 1].Init(pathInfo);
             }
+            if (botType == BotType.Boss)
+            {
+                bots.Add(Instantiate(preBossBot, poolEnemy).GetComponent<Bot>());
+            }
+            bots[bots.Count - 1].Init(pathInfo);
         }
 
         public void StartBots()
@@ -211,11 +222,10 @@ namespace Hunter
 
         public void Replay()
         {
-            bots =  new List<Bot>(botsReserve);
+            bots = new List<Bot>(botsReserve);
             poppies = new List<Player>(poppiesReserve);
             ResetBots();
             StartBots();
-            LoadUI();
             PlayerController.instance.ResetGame();
             for (int i = 0; i < poppies.Count; i++)
             {

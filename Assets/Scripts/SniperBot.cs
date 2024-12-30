@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace Hunter
 {
-    public class SniperBot : Bot
+    public class SniperBot : SentryBot
     {
         public override IEnumerator Attack(GameObject target)
         {
             throw new System.NotImplementedException();
         }
 
-        public override void FixedUpdate()
+        public override void SubtractHp(int hp)
         {
             throw new System.NotImplementedException();
         }
