@@ -17,6 +17,8 @@ namespace Hunter
         public LayerMask playerLayer;
 
         public GameObject scream;
+        public bool isFind;
+        protected float timeOff;
 
         public void StopLostTrack()
         {
@@ -27,6 +29,7 @@ namespace Hunter
         {
             if (lastTrace != null)
             {
+                Debug.LogWarning("a");
                 StopCoroutine(lastTrace);
                 lastTrace = null;
             }
@@ -60,16 +63,19 @@ namespace Hunter
         public IEnumerator Hear(GameObject target)
         {
             isFind = true;
-            navMeshAgent.destination = target.transform.position;
             questionRotate.Show();
-            animator.SetBool("Walking", true);
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            while (true)
+            if(target != null)
             {
-                if (navMeshAgent.remainingDistance <= 1.1f) animator.SetBool("Walking", false);
-                if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 1) break;
+                navMeshAgent.destination = target.transform.position;
+                animator.SetBool("Walking", true);
+            }
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            while (col.enabled)
+            {
+                if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
+                if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
                 yield return new WaitForFixedUpdate();
             }
             StartLostTrack(target);
@@ -80,13 +86,17 @@ namespace Hunter
         {
             Debug.LogWarning("LostTrack");
             Player player = GameController.instance.GetPoppy(target);
-            if (player != null) navMeshAgent.destination = player.transform.position;
-            animator.SetBool("Walking", true);
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            while (true)
+            if (player != null)
             {
+                animator.SetBool("Walking", true);
+                if (player != null) navMeshAgent.destination = player.transform.position;
+            }
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            while (col.enabled)
+            {
+
                 if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                 if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
                 yield return new WaitForFixedUpdate();
@@ -95,14 +105,14 @@ namespace Hunter
             int step = Random.Range(2, 4);
             while (step > 0)
             {
-                while (true)
+                while (col.enabled)
                 {
                     List<int> list = new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7 };
                     int indexRandom = Random.Range(0, list.Count);
                     float angle = list[indexRandom] * 45f;
                     Vector3 randomDirection = Quaternion.Euler(0, angle, 0) * Vector3.forward;
                     float distance = Random.Range(3f, 6f);
-                    Debug.DrawLine(transform.position, transform.position + randomDirection * distance, Color.red, 111);
+                    //Debug.DrawLine(transform.position, transform.position + randomDirection * distance, Color.red, 111);
                     navMeshAgent.destination = transform.position + randomDirection * distance;
                     yield return new WaitForFixedUpdate();
                     yield return new WaitForFixedUpdate();
@@ -112,7 +122,7 @@ namespace Hunter
                 }
                 animator.SetBool("Walking", true);
                 //Debug.LogError("Position = " + randomDestination + " IsUpdatePosition = " + navMeshAgent.updatePosition + " Step = " + step);
-                while (true)
+                while (col.enabled)
                 {
                     if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                     if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
@@ -128,14 +138,14 @@ namespace Hunter
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
-            while (true)
+            while (col.enabled)
             {
                 if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                 if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
                 yield return new WaitForFixedUpdate();
             }
             yield return new WaitForSeconds(pathInfo.time);
-            StartProbe();
+            StartProbe(1);
         }
 
         public IEnumerator LastTrace(GameObject target)
@@ -143,21 +153,21 @@ namespace Hunter
             Debug.LogWarning("LastTrace");
             Player player = GameController.instance.GetPoppy(target);
             navMeshAgent.isStopped = false;
-            if (player != null)
+            if (player != null) // && player.col.enabled
             {
                 animator.SetBool("Walking", true);
                 navMeshAgent.destination = player.transform.position;
                 yield return new WaitForFixedUpdate();
                 yield return new WaitForFixedUpdate();
                 yield return new WaitForFixedUpdate();
-                while (true)
+                while (col.enabled)
                 {
                     if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                     if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
                     yield return new WaitForFixedUpdate();
                 }
+                yield return new WaitForSeconds(pathInfo.time);
             }
-            yield return new WaitForSeconds(pathInfo.time);
             StartLostTrack(target);
         }
 

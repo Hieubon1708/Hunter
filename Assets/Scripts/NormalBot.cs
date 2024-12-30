@@ -78,12 +78,11 @@ namespace Hunter
 
         public override IEnumerator Attack(GameObject target)
         {
-            isKilling = true;
             Player player = GameController.instance.GetPoppy(target);
             animator.SetTrigger("Aiming");
             animator.SetTrigger("Fire");
             yield return new WaitForSeconds(0.467f);
-            while (player.col.enabled)
+            while (player != null && player.col.enabled)
             {
                 parWeapon.Play();
                 player.PlayBlood();
@@ -93,7 +92,7 @@ namespace Hunter
             StopAttack();
         }
 
-        public override void SubtractHp(int hp)
+        public override void SubtractHp(int hp, Transform killer)
         {
             if (this.hp <= 0) return;
             this.hp = Mathf.Clamp(this.hp - hp, 0, this.hp);
@@ -109,6 +108,7 @@ namespace Hunter
                 UIController.instance.HitEffect();
                 UIController.instance.ShakeCam();
                 isFind = false;
+                index = 0;
                 col.enabled = false;
                 animator.enabled = false;
                 navMeshAgent.enabled = false;

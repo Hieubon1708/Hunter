@@ -8,7 +8,7 @@ namespace Hunter
     public abstract class Bot : MonoBehaviour
     {
         public int startHp;
-        protected int hp;
+        public int hp;
         protected int indexPath;
 
         public RadarView radarView;
@@ -20,8 +20,6 @@ namespace Hunter
         public Transform hips;
         public Rigidbody[] rbs;
 
-        public bool isFind;
-        protected float timeOff;
         public bool isKilling;
 
         protected Coroutine probe;
@@ -39,9 +37,9 @@ namespace Hunter
             if (probe != null) StopCoroutine(probe);
         }
 
-        public void StartProbe()
+        public void StartProbe(int currentIndex)
         {
-            probe = StartCoroutine(Probe());
+            probe = StartCoroutine(Probe(currentIndex));
         }
 
         public void StopAttack()
@@ -61,6 +59,7 @@ namespace Hunter
             animator.ResetTrigger("NoAiming");
             animator.ResetTrigger("Fire");
             attack = StartCoroutine(Attack(target));
+            isKilling = true;
         }
 
         public void ChangeSpeed(float speed, float rotateSpeed)
@@ -69,19 +68,21 @@ namespace Hunter
             navMeshAgent.speed = rotateSpeed;
         }
 
-        public abstract void SubtractHp(int hp);
+        public abstract void SubtractHp(int hp, Transform killer);
 
-        IEnumerator Probe()
+        public int index;
+
+        IEnumerator Probe(int currentIndex)
         {
             if (pathInfo.paths[0].Length > 1)
             {
                 ChangeSpeed(pathInfo.speed, pathInfo.rotateSpeed);
-                int index = 1;
+                index = currentIndex;
                 if (pathInfo.isUpdatePosition)
                 {
                     if (pathInfo.pathType == GameController.PathType.Circle)
                     {
-                        while (true)
+                        while (col.enabled)
                         {
                             Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
                             Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -96,7 +97,7 @@ namespace Hunter
                             yield return new WaitForFixedUpdate();
                             yield return new WaitForFixedUpdate();
                             yield return new WaitForFixedUpdate();
-                            while (true)
+                            while (col.enabled)
                             {
                                 if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                                 if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
@@ -110,7 +111,7 @@ namespace Hunter
                     else if (pathInfo.pathType == GameController.PathType.Repeat)
                     {
                         bool isIncrease = true;
-                        while (true)
+                        while (col.enabled)
                         {
                             Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
                             Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -125,7 +126,7 @@ namespace Hunter
                             yield return new WaitForFixedUpdate();
                             yield return new WaitForFixedUpdate();
                             yield return new WaitForFixedUpdate();
-                            while (true)
+                            while (col.enabled)
                             {
                                 if (navMeshAgent.remainingDistance <= 0.1f) animator.SetBool("Walking", false);
                                 if (navMeshAgent.remainingDistance == navMeshAgent.stoppingDistance) break;
@@ -142,7 +143,7 @@ namespace Hunter
                 {
                     if (pathInfo.pathType == GameController.PathType.Circle)
                     {
-                        while (true)
+                        while (col.enabled)
                         {
                             Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
                             Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -159,7 +160,7 @@ namespace Hunter
                     else if (pathInfo.pathType == GameController.PathType.Repeat)
                     {
                         bool isIncrease = false;
-                        while (true)
+                        while (col.enabled)
                         {
                             Vector3 direction = new Vector3(pathInfo.paths[indexPath][index].x, transform.position.y, pathInfo.paths[indexPath][index].z) - transform.position;
                             Quaternion targetRotation = Quaternion.LookRotation(direction);

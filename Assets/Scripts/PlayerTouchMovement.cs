@@ -71,9 +71,8 @@ namespace Hunter
         {
             if (UIController.instance.gamePlay.panelStart.activeSelf)
             {
-                UIController.instance.camAni.Play("CamStartZoom");
                 ShowTouch();
-                UIController.instance.gamePlay.panelStart.SetActive(false);
+                UIController.instance.StartGame();
             }
             Vector2 clickPosition;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, Input.mousePosition, null, out clickPosition);

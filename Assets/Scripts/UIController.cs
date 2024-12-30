@@ -1,7 +1,9 @@
 using Cinemachine;
 using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using static Hunter.GameController;
 
 namespace Hunter
 {
@@ -40,6 +42,17 @@ namespace Hunter
             gamePlay.layerCover.SetActive(true);
         }
 
+        public void StartGame()
+        {
+            camAni.Play("CamStartZoom");
+            gamePlay.panelStart.SetActive(false);
+            if (boss != null)
+            {
+                GameObject h = boss.transform.Find("Health").gameObject;
+                h.SetActive(true);
+            }
+        }
+
         public void LoadUI()
         {
             gamePlay.UpdateRemainingEnemy();
@@ -62,7 +75,36 @@ namespace Hunter
 
         public void BossEnd()
         {
+            layerCover.raycastTarget = true;
+            layerCover.DOFade(1f, 0.5f).OnComplete(delegate
+            {
+                gamePlay.Restart();
+                GameController.instance.LoadLevel(PlayerPrefs.GetInt("HunterLevel", 1));
+                layerCover.DOFade(0f, 0.5f).OnComplete(delegate
+                {
+                    layerCover.raycastTarget = false;
 
+                });
+            });
+        }
+
+        Bot boss;
+
+        public IEnumerator BossIntro()
+        {
+            gamePlay.layerCover.gameObject.SetActive(true);
+            gamePlay.panelStart.SetActive(false);
+            boss = GameController.instance.GetBoss();
+            boss.transform.LookAt(PlayerController.instance.transform, Vector3.up);
+            yield return new WaitForSeconds(1f);
+            CinemachineVirtualCamera cam = boss.GetComponentInChildren<CinemachineVirtualCamera>();
+            cam.Priority = 100;
+            yield return new WaitForSeconds(3f);
+            cam.Priority = 1;
+            yield return new WaitForSeconds(2f);
+            gamePlay.layerCover.gameObject.SetActive(false);
+            gamePlay.panelStart.SetActive(true);
+            GameController.instance.StartBots();
         }
 
         public void HitEffect()

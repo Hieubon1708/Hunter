@@ -15,6 +15,7 @@ namespace Hunter
 
         public Transform poolEnemy;
         public Transform poolPoppy;
+        public Transform poolWeapon;
 
         public Camera cam;
         public WeaponEquip weaponEquip;
@@ -38,10 +39,25 @@ namespace Hunter
             instance = this;
         }
 
+        public PoppyType RandomPoppy()
+        {
+            int indexRandom = Random.Range(0, 8);
+            switch (indexRandom)
+            {
+                case 0: return PoppyType.Bobby;
+                case 1: return PoppyType.Bubba;
+                case 2: return PoppyType.Poppy;
+                case 3: return PoppyType.Catnap;
+                case 4: return PoppyType.Craftycorn;
+                case 5: return PoppyType.Hoppy;
+                case 6: return PoppyType.Kickin;
+                case 7: return PoppyType.Pickypiggy;
+                default: return PoppyType.Poppy;
+            }
+        }
+
         public void Start()
         {
-            LoadPoppy();
-            LoadWeaponPoppies(WeaponType.Knife);
             PlayerPrefs.DeleteAll();
             LoadLevel(PlayerPrefs.GetInt("HunterLevel", 1));
         }
@@ -81,6 +97,8 @@ namespace Hunter
         public void LoadLevel(int level)
         {
             isResarting = true;
+            LoadPoppy();
+            LoadWeaponPoppies(WeaponType.Knife);
             for (int i = 0; i < poolEnemy.childCount; i++)
             {
                 Destroy(poolEnemy.GetChild(i).gameObject);
@@ -96,17 +114,36 @@ namespace Hunter
             poppiesReserve = new List<Player>(poppies);
             botsReserve = new List<Bot>(bots);
             ResetBots();
-            StartBots();
+            if (!IsBoss()) StartBots();
+            else StartCoroutine(UIController.instance.BossIntro());
             LoadUI();
             DOVirtual.DelayedCall(0.02f, delegate { isResarting = false; });
         }
 
         void LoadPoppy()
         {
-            for (int i = 0; i < poppyTypes.Count; i++)
+            for (int i = poppies.Count; i < poppyTypes.Count; i++)
             {
                 AddPoppy(poppyTypes[i]);
             }
+        }
+
+        public bool IsBoss()
+        {
+            for (int i = 0; i < pathInfos.Length; i++)
+            {
+                if (pathInfos[i].botType == BotType.Boss) return true;
+            }
+            return false;
+        }
+
+        public Bot GetBoss()
+        {
+            for (int i = 0; i < pathInfos.Length; i++)
+            {
+                if (pathInfos[i].botType == BotType.Boss) return bots[i];
+            }
+            return null;
         }
 
         public void RemovePoppy(Player poppy)
@@ -121,7 +158,7 @@ namespace Hunter
 
         void LoadWeaponPoppies(WeaponType weaponType)
         {
-            for (int i = 0; i < poppies.Count; i++)
+            for (int i = poppies.Count - 1; i < poppyTypes.Count; i++)
             {
                 poppies[i].LoadWeapon(weaponType);
             }
@@ -144,7 +181,7 @@ namespace Hunter
             player.LoadWeapon(weaponType);
         }
 
-        Player AddPoppy(PoppyType poppyType)
+        public Player AddPoppy(PoppyType poppyType)
         {
             GameObject p = Instantiate(prePoppies[(int)poppyType], poolPoppy);
             Player sc = p.GetComponent<Player>();
@@ -216,7 +253,7 @@ namespace Hunter
         {
             for (int i = 0; i < bots.Count; i++)
             {
-                bots[i].StartProbe();
+                bots[i].StartProbe(1);
             }
         }
 

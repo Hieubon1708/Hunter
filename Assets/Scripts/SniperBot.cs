@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Hunter
@@ -11,7 +10,7 @@ namespace Hunter
             throw new System.NotImplementedException();
         }
 
-        public override void SubtractHp(int hp)
+        public override void SubtractHp(int hp, Transform killer)
         {
             throw new System.NotImplementedException();
         }

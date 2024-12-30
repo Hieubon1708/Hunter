@@ -9,11 +9,8 @@ namespace HieuBon
         [SerializeField] private Camera cam;
         [SerializeField] private CanvasScaler canvasScaler;
 
-        IEnumerator Start()
+        void Start()
         {
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
             CheckSize();
         }
 
@@ -23,6 +20,7 @@ namespace HieuBon
             {
                 canvasScaler = GetComponent<CanvasScaler>();
             }
+            if(cam == null) cam = Camera.main;
             canvasScaler.matchWidthOrHeight = cam.aspect < 1.818f ? 0 : 1;
         }
     }

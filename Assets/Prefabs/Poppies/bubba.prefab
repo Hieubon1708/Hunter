@@ -707,6 +707,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Agent: {fileID: 509923449842474666}
   animator: {fileID: 1377256364004223982}
+  player: {fileID: 879448553718501089}
   extraX: 0
   extraY: 0
 --- !u!1 &1326657146542891869

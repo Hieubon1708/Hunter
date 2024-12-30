@@ -19,6 +19,7 @@ namespace Hunter
 
         public void Replay()
         {
+            layerCover.SetActive(false);
             buttonReplay.SetActive(false);
             GameController.instance.isResarting = true;
             GameController.instance.Replay();

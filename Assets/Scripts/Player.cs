@@ -63,7 +63,7 @@ namespace Hunter
                     Invoke("ChangeLookAt", 0.5f);
                     delayKill = DOVirtual.DelayedCall(0.35f, delegate
                     {
-                        bot.SubtractHp(weapon.damage);
+                        bot.SubtractHp(weapon.damage, transform);
                         delayKill = DOVirtual.DelayedCall(0.35f, delegate
                         {
                             isKilling = false;

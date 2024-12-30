@@ -10,6 +10,7 @@ namespace Hunter
     {
         public NavMeshAgent Agent;
         public Animator animator;
+        public Player player;
         public float extraX;
         public float extraY;
         bool isXIncrease;
@@ -47,6 +48,7 @@ namespace Hunter
         {
             if (PlayerController.instance != null)
             {
+                transform.LookAt(player.lookAt.transform);
                 float touch = PlayerController.instance.GetSpeed();
                 float speed = touch == 0 ? Agent.velocity.magnitude : touch * Agent.speed / 3;
                 animator.SetFloat("Speed", Mathf.Clamp01(speed));
